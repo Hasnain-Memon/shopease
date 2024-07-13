@@ -25,5 +25,5 @@ app.use(cookieParser());
 app.use('/api/v1/user', userRouter);
 
 app.listen(port, () => {
-    console.log(`app is listening on ${port}}`);
+    console.log(`app is listening on ${port}`);
 })
