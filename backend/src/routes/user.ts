@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 import { upload } from "../middlewares/multer.middleware";
 import { uploadOnCloudinary } from "../utils/cloudinary";
 import bcrypt from "bcryptjs"
@@ -189,6 +189,48 @@ try {
 
 })
 
+// sign out route
+router.get('/sign-out', authenticationJWT, async (req: Request | any, res) => {
+
+    try {
+        
+        const userId = req.user.id;
+
+        const user = await prismaClient.user.findFirst({
+            where: {
+                id: userId
+            }
+        })
+
+        if (!user) {
+            return res
+            .status(404)
+            .json({
+                status: 404,
+                message: "User not found"
+            })
+        }
+
+        const options = {
+            httpOnly: true,
+            secure: true
+        }
+
+        return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .json({
+            status: 200,
+            message: "User signed out successfully"
+        });
+
+    } catch (error) {
+        console.log("Error signing out user", error);
+        throw error;
+    }
+
+})
+
 // edit usename route
 router.put('/edit-username', authenticationJWT, async (req: any, res) => {
     try {
@@ -206,7 +248,7 @@ router.put('/edit-username', authenticationJWT, async (req: any, res) => {
 
         const updatedUser = await prismaClient.user.update({
             where: {
-                id: req.user?.id
+                id: req.user.id
             },
             data: {
                 username
@@ -291,12 +333,20 @@ router.put('/edit-password', authenticationJWT, async (req: any, res) => {
 router.delete("/delete", authenticationJWT, async (req: any, res) => {
     
     try {
+
+        const userId = req.user.id;
         
+        // const deletedUser = await prismaClient.user.delete({
+        //     where: {
+        //         id: req.user.id
+        //     }
+        // })
+
         const deletedUser = await prismaClient.user.delete({
             where: {
-                id: req?.user.id
+                id: Number(userId)
             }
-        })
+        });
 
         return res
         .status(200)
@@ -307,7 +357,7 @@ router.delete("/delete", authenticationJWT, async (req: any, res) => {
         })
 
     } catch (error) {
-         console.log("Error deleting user", error);
+        console.log("Error deleting user", error);
         throw error;
     }
 

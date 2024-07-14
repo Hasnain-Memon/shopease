@@ -35,9 +35,9 @@ const authenticationJWT = async (req: Request | any, res: Response | any, next: 
         }
 
 
-        const user = prismaClient.user.findFirst({
+        const user = await prismaClient.user.findFirst({
             where: {
-                id: Number(decodedToken?.id)
+                id: decodedToken.id
             }
         })
 
