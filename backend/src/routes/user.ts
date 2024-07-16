@@ -2,11 +2,12 @@ import { Router } from "express";
 import { PrismaClient, User } from "@prisma/client";
 import { upload } from "../middlewares/multer.middleware";
 import { uploadOnCloudinary } from "../utils/cloudinary";
-import bcrypt from "bcryptjs"
+import bcrypt, { compareSync } from "bcryptjs"
 import jwt from "jsonwebtoken"
 import { authenticationJWT } from "../middlewares/auth.middleware";
+import { serialize } from "v8";
 
-const router = Router();
+const router: Router = Router();
 
 const prismaClient = new PrismaClient();
 
@@ -87,14 +88,6 @@ router.post('/sign-up',upload.fields([
                 status: 502,
                 message: "Something went wrong while creating user"
             })
-        }
-
-
-        // return res along with the cookies.
-
-        const options = {
-            httpOnly: true,
-            secure: true
         }
 
         return res
@@ -361,6 +354,77 @@ router.delete("/delete", authenticationJWT, async (req: any, res) => {
         throw error;
     }
 
+})
+
+router.get("/all-users", authenticationJWT, async (req, res) => {
+    try {
+
+        const users = await prismaClient.user.findMany();
+
+        if (!users) {
+            return res
+            .status(500)
+            .json({
+                status: 500,
+                message: "Something went wrong while fetching all users"
+            })
+        }
+
+        return res
+            .status(200)
+            .json({
+                status: 200,
+                users,
+                message: "Users fetched successfully"
+            })
+        
+    } catch (error) {
+        console.log("Error getting all user", error);
+        throw error;
+    }
+})
+
+router.get("/:id", authenticationJWT, async (req, res) => {
+    try {
+
+        const userId = req.params.id;
+
+        if (!userId) {
+            return res
+            .status(401)
+            .json({
+                status: 401,
+                message: "User id missing"
+            })
+        }
+
+        const user = await prismaClient.user.findFirst({
+            where: {
+                id: Number(userId)
+            }
+        })
+
+        if (!user) {
+            return res
+            .status(500)
+            .json({
+                status: 500,
+                message: "Something went wrong while getting user"
+            })
+        }
+
+        return res
+        .status(200)
+        .json({
+            status: 200,
+            user,
+            message: "User fetched successfully"
+        })
+        
+    } catch (error) {
+        console.log("Error getting user", error);
+        throw error;
+    }
 })
 
 export default router;

@@ -34,11 +34,13 @@ model Product {
   warehouse1         String
   warehouse2         String?
   warehouse3         String?
+  price              String             @default("0")
   owner              User               @relation(fields: [owner_id], references: [id])
   owner_id           Int
   reviews            Review[]
   category           category           @relation(fields: [category_id], references: [id])
   category_id        Int
+  shipping_fee       String             @default("0")
 }
 
 model Review {
@@ -68,4 +70,5 @@ model Order {
   landmark           String?
   seller             User               @relation(fields: [seller_id], references: [id])
   seller_id          Int
+  order_status       String[]           @default(["Fullfilled", "Pending", "Cancelled"])
 }
