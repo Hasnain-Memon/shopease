@@ -6,6 +6,7 @@ import bcrypt, { compareSync } from "bcryptjs"
 import jwt from "jsonwebtoken"
 import { authenticationJWT } from "../middlewares/auth.middleware";
 import { serialize } from "v8";
+import { profile } from "console";
 
 const router: Router = Router();
 
@@ -16,7 +17,7 @@ interface MulterRequest extends Request {
         [fieldname: string]: Express.Multer.File[];
     };
 }
-// sign up route
+
 router.post('/sign-up',upload.fields([
     {
         name: "profile_img",
@@ -104,7 +105,6 @@ router.post('/sign-up',upload.fields([
     }
 })
 
-// sign in route
 router.post('/sign-in', async (req, res) => {
 try {
     
@@ -182,7 +182,6 @@ try {
 
 })
 
-// sign out route
 router.get('/sign-out', authenticationJWT, async (req: Request | any, res) => {
 
     try {
@@ -224,7 +223,6 @@ router.get('/sign-out', authenticationJWT, async (req: Request | any, res) => {
 
 })
 
-// edit usename route
 router.put('/edit-username', authenticationJWT, async (req: any, res) => {
     try {
         
@@ -271,7 +269,6 @@ router.put('/edit-username', authenticationJWT, async (req: any, res) => {
     }
 })
 
-// edit password route
 router.put('/edit-password', authenticationJWT, async (req: any, res) => {
     
     try {
@@ -322,7 +319,6 @@ router.put('/edit-password', authenticationJWT, async (req: any, res) => {
 
 })
 
-// delete user route
 router.delete("/delete", authenticationJWT, async (req: any, res) => {
     
     try {
@@ -423,6 +419,63 @@ router.get("/:id", authenticationJWT, async (req, res) => {
         
     } catch (error) {
         console.log("Error getting user", error);
+        throw error;
+    }
+})
+
+router.post("/change-profle-image", upload.single("profile_img"),  authenticationJWT, async (req: MulterRequest | any, res) => {
+    try {
+
+        const userId = req.user.id;
+
+        if (!userId) {
+            return res
+            .status(401)
+            .json({
+                status: 401,
+                message: "User id is missing"
+            })
+        }
+        
+        const profileImageLocalPath = req.files.profile_img[0].path;
+        const profileImage = await uploadOnCloudinary(profileImageLocalPath);
+        
+        if (!profileImage?.url) {
+            return res
+            .status(501)
+            .json({
+                message: "Something went wrong while uploading profile image"
+            })
+        }
+
+        const user = await prismaClient.user.update({
+            where: {
+                id: Number(userId)
+            },
+            data: {
+                profile_img: profileImage.url
+            }
+        })
+
+        if (!user) {
+            return res
+            .status(500)
+            .json({
+                status: 500,
+                message: "something went wrong while updating profile image"
+            })
+        }
+
+        return res
+        .status(200)
+        .json({
+            status: 200,
+            user,
+            message: "Profile image updated successfully"
+        })
+
+    } catch (error) {
+        console.log("Error changing profile image", error);
         throw error;
     }
 })

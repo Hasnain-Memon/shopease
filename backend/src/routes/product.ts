@@ -294,4 +294,65 @@ router.put("/update-product/:id", authenticationJWT, async (req, res) => {
     }
 })
 
+router.post("/update-product-images/:id", upload.fields([
+    { name: "product_img", maxCount: 8 }
+]), authenticationJWT, async (req: MulterRequest | any, res) => {
+    try {
+        
+        const userId = req.user.id;
+        const productId = req.params.id;
+
+        if (!(userId | productId)) {
+            return res
+            .status(401)
+            .json({
+                message: "userId/productId is missing"
+            })
+        }
+
+        const productImageLocalPath = req.files.product_img[0].path;
+        const productImages = await uploadOnCloudinary(productImageLocalPath);
+        
+        if (!productImages?.url) {
+            return res
+            .status(501)
+            .json({
+                status: 501,
+                message: "Something went wrong while uploading product images on cloudinary"
+            })
+        }
+
+        const product = await prismaClient.product.update({
+            where: {
+                id: Number(productId),
+                owner_id: Number(userId)
+            },
+            data: {
+                images: [productImages.url]
+            }
+        })
+
+        if (!product) {
+            return res
+            .status(500)
+            .json({
+                status: 500,
+                message: "Something went wrong while updating product images"
+            })
+        }
+
+        return res
+        .status(200)
+        .json({
+            status: 200,
+            product,
+            message: "Product images updated successfully"
+        })
+
+    } catch (error) {
+        console.log("Error updating product images", error);
+        throw error;
+    }
+})
+
 export default router;
