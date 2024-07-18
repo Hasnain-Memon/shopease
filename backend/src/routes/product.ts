@@ -305,6 +305,7 @@ router.put("/update-product/:id", authenticationJWT, async (req, res) => {
     }
 })
 
+// untested
 router.post("/update-product-images/:id", upload.fields([
     { name: "product_img", maxCount: 8 }
 ]), authenticationJWT, async (req: MulterRequest | any, res) => {
@@ -366,6 +367,7 @@ router.post("/update-product-images/:id", upload.fields([
     }
 })
 
+// untested
 router.get("/get-user-products/:id", authenticationJWT, async (req, res) => {
     try {
 
@@ -413,6 +415,51 @@ router.get("/get-user-products/:id", authenticationJWT, async (req, res) => {
     
     } catch (error) {
         console.log("Erro getting all products from user", error);
+        throw error;
+    }
+})
+
+// untested
+router.get("/get-products-by-query", authenticationJWT, async (req, res) => {
+    try {
+
+        const searchTerm  = req.query.q || '';
+
+        if (!searchTerm) {
+            return res
+            .status(402)
+            .json({
+                message: "search term is unavailable"
+            })
+        }
+
+        const product = await prismaClient.product.findMany({
+            where: {
+                title: {
+                    contains: String(searchTerm),
+                    mode: "insensitive"
+                }
+            }
+        })
+
+        if (!product) {
+            return res
+            .status(404)
+            .json({
+                status: 404,
+                message: "products not found"
+            })
+        }
+
+        return res
+            .status(200)
+            .json({
+                status: 200,
+                message: "Products based on search term fetched successfully"
+            })
+        
+    } catch (error) {
+        console.log("Error getting products based on query", error);
         throw error;
     }
 })

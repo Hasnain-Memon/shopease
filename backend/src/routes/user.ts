@@ -423,6 +423,7 @@ router.get("/:id", authenticationJWT, async (req, res) => {
     }
 })
 
+// untested
 router.post("/change-profle-image", upload.single("profile_img"),  authenticationJWT, async (req: MulterRequest | any, res) => {
     try {
 
