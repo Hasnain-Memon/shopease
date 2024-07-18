@@ -12,7 +12,7 @@ interface MulterRequest extends Request {
     files: {
         [fieldname: string]: Express.Multer.File[];
     };
-}  
+}
 
 router.post('/add-product', upload.fields([
     {
@@ -167,7 +167,18 @@ router.delete("/remove-product/:id", authenticationJWT, async (req, res) => {
 router.get("/all-products", authenticationJWT, async (req, res) => {
     try {
 
-        const products = await prismaClient.product.findMany();
+        const { page = 1, limit = 10, sortBy, sortType }: any = req.query;
+
+        const parsedLimit = parseInt(limit);
+        const pageSkip = (page - 1) * parsedLimit;
+        const sortStage: any = {};
+        sortStage[sortBy] = sortType === 'asc' ? 1 : -1;
+
+        const products = await prismaClient.product.findMany({
+            skip: pageSkip,
+            take: parsedLimit,
+            orderBy: sortStage
+        });
 
         if (!products) {
             return res
@@ -354,5 +365,7 @@ router.post("/update-product-images/:id", upload.fields([
         throw error;
     }
 })
+
+// get products from user
 
 export default router;
