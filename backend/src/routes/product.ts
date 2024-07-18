@@ -366,6 +366,55 @@ router.post("/update-product-images/:id", upload.fields([
     }
 })
 
-// get products from user
+router.get("/get-user-products/:id", authenticationJWT, async (req, res) => {
+    try {
+
+        const { page = 1, limit = 10, sortBy, sortType }: any = req.query;
+        const parsedLimit = parseInt(limit);
+        const pageSkip = (page - 1) * parsedLimit;
+        const sortStage: any = {};
+        sortStage[sortBy] = sortType === 'asc' ? 1 : -1;
+        
+        const userId = req.params.id;
+
+        if (!userId) {
+            return res
+            .status(401)
+            .json({
+                message: "User id is missing"
+            })
+        }
+
+        const products = await prismaClient.product.findMany({
+            where: {
+                owner_id: Number(userId)
+            },
+            skip: pageSkip,
+            take: parsedLimit,
+            orderBy: sortStage
+        })
+
+        if (!products) {
+            return res
+            .status(404)
+            .json({
+                status: 404,
+                message: "Products not found"
+            })
+        }
+
+        return res
+        .status(200)
+        .json({
+            status: 200,
+            products,
+            message: "Products fetched successfully"
+        })
+    
+    } catch (error) {
+        console.log("Erro getting all products from user", error);
+        throw error;
+    }
+})
 
 export default router;
