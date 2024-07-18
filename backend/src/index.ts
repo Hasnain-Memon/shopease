@@ -5,6 +5,7 @@ import dotenv from "dotenv"
 import userRoute from "./routes/user"
 import productRoute from "./routes/product"
 import categoryRoute from "./routes/category"
+import reviewRoute from "./routes/review";
 
 dotenv.config({
     path: "./.env"
@@ -27,6 +28,7 @@ app.use(cookieParser());
 app.use('/api/v1/user', userRoute);
 app.use('/api/v1/product', productRoute);
 app.use('/api/v1/category', categoryRoute);
+app.use('/api/v1/review', reviewRoute);
 
 app.listen(port, () => {
     console.log(`app is listening on ${port}`);
