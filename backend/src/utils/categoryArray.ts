@@ -1,0 +1,40 @@
+export interface Category {
+    name: string;
+}
+
+export const categories: Category[] = [
+    { name: 'Electronics' },
+    { name: 'Fashion' },
+    { name: 'Home Goods' },
+    { name: 'Books' },
+    { name: 'Sports' },
+    { name: 'Toys' },
+    { name: 'Beauty' },
+    { name: 'Automotive' },
+    { name: 'Grocery' },
+    { name: 'Health' },
+    { name: 'Jewelry' },
+    { name: 'Pet Supplies' },
+    { name: 'Office Supplies' },
+    { name: 'Musical Instruments' },
+    { name: 'Garden & Outdoor' },
+    { name: 'Baby Products' },
+    { name: 'Furniture' },
+    { name: 'Crafts & Sewing' },
+    { name: 'Tools & Hardware' },
+    { name: 'Travel Accessories' },
+    { name: 'Watches' },
+    { name: 'Luggage & Bags' },
+    { name: 'Video Games' },
+    { name: 'Movies & TV' },
+    { name: 'Collectibles & Fine Art' },
+    { name: 'Industrial & Scientific' },
+    { name: 'Software' },
+    { name: 'Digital Music' },
+    { name: 'Gift Cards' },
+    { name: 'Seasonal' },
+    { name: 'Religious Items' },
+    { name: 'Luxury' },
+    { name: 'Green & Eco-friendly' },
+    { name: 'Holiday Decorations' }
+];

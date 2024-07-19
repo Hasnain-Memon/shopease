@@ -1,50 +1,45 @@
 import { Router } from "express";
 import { PrismaClient } from "@prisma/client";
 import { authenticationJWT } from "../middlewares/auth.middleware";
+import { categories } from "../utils/categoryArray";
+import { Category } from "../utils/categoryArray";
 
 const router: Router = Router();
 
 const prismaClient: PrismaClient= new PrismaClient();
 
-router.post("/add-category", authenticationJWT, async (req, res) => {
+router.post("/add-categories", async (req, res) => {
     try {
         
-        const { name } = req.body;
-
-        if (!name) {
-            return res
-            .status(401)
-            .json({
-                status: 401,
-                message: "name is required"
-            });
-        }
-
-        const category = await prismaClient.category.create({
-            data: {
-                name: name
+        async function createCategories(){
+            for (const category of categories) {
+                await prismaClient.category.create({
+                    data: {
+                        name: category.name
+                    }
+                })
             }
-        })
-
-        if (!category) {
-            return res
-            .status(500)
-            .json({
-                status: 500,
-                message: "Something went wrong while creating category"
-            })
         }
 
-        return res
-            .status(200)
-            .json({
-                status: 200,
-                category,
-                message: "Category created successfully"
-            })
+        createCategories();
+         
+    } catch (error) {
+        console.log("Error adding categories", error);
+        throw error;
+    }
+})
+
+router.get("/get-category", async (req, res) => {
+    try {
+        
+        async function getCategoris() {
+            return await prismaClient.category.findMany();
+        }
+
+        getCategoris();
 
     } catch (error) {
-        console.log("Error adding category");
+        console.log("Error getting categories", error);
         throw error;
     }
 })
