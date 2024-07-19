@@ -8,6 +8,7 @@ const router: Router = Router();
 
 const prismaClient: PrismaClient= new PrismaClient();
 
+// untested
 router.post("/add-categories", async (req, res) => {
     try {
         
@@ -29,6 +30,7 @@ router.post("/add-categories", async (req, res) => {
     }
 })
 
+// untested
 router.get("/get-category", async (req, res) => {
     try {
         
