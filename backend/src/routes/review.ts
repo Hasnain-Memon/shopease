@@ -6,7 +6,7 @@ const router: Router = Router();
 
 const prismaClient: PrismaClient = new PrismaClient();
 
-// untested
+
 router.post("/add-review/product/:id", authenticationJWT, async (req: any, res) => {
     try {
 
@@ -60,7 +60,6 @@ router.post("/add-review/product/:id", authenticationJWT, async (req: any, res) 
     }
 })
 
-// untested
 router.put("/edit-review/producct/:productId/review/:reviewId", authenticationJWT, async (req: any, res) => {
     try {
 
@@ -117,7 +116,6 @@ router.put("/edit-review/producct/:productId/review/:reviewId", authenticationJW
     }
 })
 
-// untested
 router.delete("/delete-review/:id", authenticationJWT, async (req: any, res) =>{
     try {
         
@@ -161,7 +159,6 @@ router.delete("/delete-review/:id", authenticationJWT, async (req: any, res) =>{
     }
 })
 
-// untested
 router.get("/get-review/:id", authenticationJWT, async (req, res) => {
     try {
 
@@ -194,6 +191,7 @@ router.get("/get-review/:id", authenticationJWT, async (req, res) => {
         .status(200)
         .json({
             status: 200,
+            review,
             message: "Review fetched successfully"
         })
         
@@ -203,7 +201,6 @@ router.get("/get-review/:id", authenticationJWT, async (req, res) => {
     }
 })
 
-// untested
 router.get("/get-all-reviews", authenticationJWT, async (req, res) => {
     try {
 
@@ -222,6 +219,7 @@ router.get("/get-all-reviews", authenticationJWT, async (req, res) => {
             .status(200)
             .json({
                 status: 200,
+                allReviews,
                 message: "All reviews fecthed successfully"
             })
         

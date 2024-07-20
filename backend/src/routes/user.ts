@@ -5,8 +5,6 @@ import { uploadOnCloudinary } from "../utils/cloudinary";
 import bcrypt, { compareSync } from "bcryptjs"
 import jwt from "jsonwebtoken"
 import { authenticationJWT } from "../middlewares/auth.middleware";
-import { serialize } from "v8";
-import { profile } from "console";
 
 const router: Router = Router();
 

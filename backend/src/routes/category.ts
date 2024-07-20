@@ -1,8 +1,6 @@
 import { Router } from "express";
 import { PrismaClient } from "@prisma/client";
-import { authenticationJWT } from "../middlewares/auth.middleware";
 import { categories } from "../utils/categoryArray";
-import { Category } from "../utils/categoryArray";
 
 const router: Router = Router();
 

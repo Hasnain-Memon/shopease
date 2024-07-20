@@ -6,7 +6,6 @@ const router: Router = Router();
 
 const prismaClient: PrismaClient = new PrismaClient();
 
-// untested
 router.post("/place-order/product/:id", authenticationJWT, async (req: any, res) => {
     try {
 
