@@ -423,8 +423,12 @@ router.get("/:id", authenticationJWT, async (req, res) => {
     }
 })
 
-// untested
-router.post("/change-profle-image", upload.single("profile_img"),  authenticationJWT, async (req: MulterRequest | any, res) => {
+router.post("/change-profle-image", upload.fields([
+    {
+        name: "profile_img",
+        maxCount: 1
+    }
+]),  authenticationJWT, async (req: MulterRequest | any, res) => {
     try {
 
         const userId = req.user.id;
@@ -438,7 +442,7 @@ router.post("/change-profle-image", upload.single("profile_img"),  authenticatio
             })
         }
         
-        const profileImageLocalPath = req.files.profile_img[0].path;
+        const profileImageLocalPath = req.files?.profile_img[0]?.path;
         const profileImage = await uploadOnCloudinary(profileImageLocalPath);
         
         if (!profileImage?.url) {
