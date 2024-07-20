@@ -172,7 +172,7 @@ router.get("/all-products", authenticationJWT, async (req, res) => {
         const parsedLimit = parseInt(limit);
         const pageSkip = (page - 1) * parsedLimit;
         const sortStage: any = {};
-        sortStage[sortBy] = sortType === 'asc' ? 1 : -1;
+        sortStage[sortBy] = sortType === 'asc' ? "asc" : "desc";
 
         const products = await prismaClient.product.findMany({
             skip: pageSkip,
@@ -305,7 +305,6 @@ router.put("/update-product/:id", authenticationJWT, async (req, res) => {
     }
 })
 
-// untested
 router.post("/update-product-images/:id", upload.fields([
     { name: "product_img", maxCount: 8 }
 ]), authenticationJWT, async (req: MulterRequest | any, res) => {
@@ -367,7 +366,6 @@ router.post("/update-product-images/:id", upload.fields([
     }
 })
 
-// untested
 router.get("/get-user-products/:id", authenticationJWT, async (req, res) => {
     try {
 
@@ -375,7 +373,7 @@ router.get("/get-user-products/:id", authenticationJWT, async (req, res) => {
         const parsedLimit = parseInt(limit);
         const pageSkip = (page - 1) * parsedLimit;
         const sortStage: any = {};
-        sortStage[sortBy] = sortType === 'asc' ? 1 : -1;
+        sortStage[sortBy] = sortType === 'asc' ? "asc" : "desc";
         
         const userId = req.params.id;
 
@@ -396,7 +394,7 @@ router.get("/get-user-products/:id", authenticationJWT, async (req, res) => {
             orderBy: sortStage
         })
 
-        if (!products) {
+        if (products.length === 0) {
             return res
             .status(404)
             .json({
@@ -419,7 +417,6 @@ router.get("/get-user-products/:id", authenticationJWT, async (req, res) => {
     }
 })
 
-// untested
 router.get("/get-products-by-query", authenticationJWT, async (req, res) => {
     try {
 
@@ -455,6 +452,7 @@ router.get("/get-products-by-query", authenticationJWT, async (req, res) => {
             .status(200)
             .json({
                 status: 200,
+                product: product,
                 message: "Products based on search term fetched successfully"
             })
         
