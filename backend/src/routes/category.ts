@@ -8,7 +8,6 @@ const router: Router = Router();
 
 const prismaClient: PrismaClient= new PrismaClient();
 
-// untested
 router.post("/add-categories", async (req, res) => {
     try {
         
@@ -22,7 +21,24 @@ router.post("/add-categories", async (req, res) => {
             }
         }
 
-        createCategories();
+        await createCategories()
+        .then((x) => {
+            console.log("Categories created");
+            return res
+            .status(200)
+            .json({
+                message: "Categories created successfully"
+            })
+        })
+        .catch((err) => {
+            console.log("categories are not creating");
+            return res
+            .status(501)
+            .json({
+                message: "Something went wrong whuile creating categories"
+            })
+        })
+
          
     } catch (error) {
         console.log("Error adding categories", error);
@@ -30,7 +46,6 @@ router.post("/add-categories", async (req, res) => {
     }
 })
 
-// untested
 router.get("/get-category", async (req, res) => {
     try {
         
@@ -38,7 +53,22 @@ router.get("/get-category", async (req, res) => {
             return await prismaClient.category.findMany();
         }
 
-        getCategoris();
+        await getCategoris()
+        .then((x) => {
+            return res
+            .status(200)
+            .json({
+                message: "Categories fetched successfully",
+                categories: x
+            })
+        })
+        .catch((err) => {
+            return res
+            .status(500)
+            .json({
+                message: "fetching failed"
+            })
+        })
 
     } catch (error) {
         console.log("Error getting categories", error);
