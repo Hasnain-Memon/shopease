@@ -40,7 +40,8 @@ model Product {
   reviews            Review[]
   category           category           @relation(fields: [category_id], references: [id])
   category_id        Int
-  shipping_fee       String             @default("0")
+  shipping_fee       String?             @default("0")
+  orders             Order[]
 }
 
 model Review {
@@ -68,7 +69,9 @@ model Order {
   area               String
   address            String
   landmark           String?
-  seller             User               @relation(fields: [seller_id], references: [id])
-  seller_id          Int
-  order_status       String[]           @default(["Fullfilled", "Pending", "Cancelled"])
+  product            Product            @relation(fields: [product_id], references: [id])
+  product_id         Int
+  buyer              User               @relation(fields: [buyer_id], references: [id])
+  buyer_id           Int
+  order_status       String[]           @default([ "Pending", "Fullfilled", "Cancelled"])
 }
