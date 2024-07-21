@@ -175,6 +175,9 @@ router.get("/get-review/:id", authenticationJWT, async (req, res) => {
         const review = await prismaClient.review.findFirst({
             where: {
                 id: Number(reviewId)
+            },
+            include: {
+                reviewer: true
             }
         })
 
@@ -204,7 +207,11 @@ router.get("/get-review/:id", authenticationJWT, async (req, res) => {
 router.get("/get-all-reviews", authenticationJWT, async (req, res) => {
     try {
 
-        const allReviews = await prismaClient.review.findMany();
+        const allReviews = await prismaClient.review.findMany({
+            include: {
+                reviewer: true
+            }
+        });
 
         if (!allReviews) {
             return res

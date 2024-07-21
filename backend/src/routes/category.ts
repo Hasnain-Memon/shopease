@@ -48,7 +48,19 @@ router.get("/get-category", async (req, res) => {
     try {
         
         async function getCategoris() {
-            return await prismaClient.category.findMany();
+            return await prismaClient.category.findMany({
+                include: {
+                    products: {
+                        select: {
+                            id: true,
+                            title: true,
+                            description: true,
+                            images: true,
+                            price: true,
+                        }
+                    }
+                }
+            });
         }
 
         await getCategoris()

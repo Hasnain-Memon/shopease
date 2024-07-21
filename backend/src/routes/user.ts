@@ -353,7 +353,18 @@ router.delete("/delete", authenticationJWT, async (req: any, res) => {
 router.get("/all-users", authenticationJWT, async (req, res) => {
     try {
 
-        const users = await prismaClient.user.findMany();
+        const users = await prismaClient.user.findMany({
+            include: {
+                products: {
+                    select: {
+                        title: true,
+                        description: true,
+                        images: true,
+                        price: true
+                    }
+                }
+            }
+        });
 
         if (!users) {
             return res
@@ -395,6 +406,16 @@ router.get("/:id", authenticationJWT, async (req, res) => {
         const user = await prismaClient.user.findFirst({
             where: {
                 id: Number(userId)
+            },
+            include: {
+                products: {
+                    select: {
+                        title: true,
+                        description: true,
+                        price: true,
+                        images: true,
+                    }
+                }
             }
         })
 

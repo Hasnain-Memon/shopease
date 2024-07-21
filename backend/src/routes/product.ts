@@ -175,6 +175,15 @@ router.get("/all-products", authenticationJWT, async (req, res) => {
         sortStage[sortBy] = sortType === 'asc' ? "asc" : "desc";
 
         const products = await prismaClient.product.findMany({
+            include: {
+                reviews: {
+                    select: {
+                        review_content: true,
+                        created_at: true,
+                        reviewer: true
+                    }
+                }
+            },
             skip: pageSkip,
             take: parsedLimit,
             orderBy: sortStage
@@ -220,6 +229,15 @@ router.get("/get-product/:id", authenticationJWT, async(req, res) => {
         const product = await prismaClient.product.findFirst({
             where: {
                 id: Number(productId)
+            },
+            include: {
+                reviews: {
+                    select: {
+                        review_content: true,
+                        created_at: true,
+                        reviewer: true
+                    }
+                }
             }
         });
 
@@ -435,6 +453,15 @@ router.get("/get-products-by-query", authenticationJWT, async (req, res) => {
                 title: {
                     contains: String(searchTerm),
                     mode: "insensitive"
+                }
+            },
+            include: {
+                reviews: {
+                    select: {
+                        review_content: true,
+                        created_at: true,
+                        reviewer: true
+                    }
                 }
             }
         })
