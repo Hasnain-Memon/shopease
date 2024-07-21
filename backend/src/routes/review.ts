@@ -22,7 +22,7 @@ router.post("/add-review/product/:id", authenticationJWT, async (req: any, res) 
             })
         }
 
-        const review = await prismaClient.review.create({
+        const review: any = await prismaClient.review.create({
             data: {
                 review_content: review_content,
                 product: {
@@ -38,7 +38,7 @@ router.post("/add-review/product/:id", authenticationJWT, async (req: any, res) 
             }
         })
 
-        if (!review) {
+        if (review.length === 0) {
             return res
             .status(500)
             .json({
@@ -84,7 +84,7 @@ router.put("/edit-review/producct/:productId/review/:reviewId", authenticationJW
             })
         }
 
-        const editedReview = await prismaClient.review.update({
+        const editedReview: any = await prismaClient.review.update({
             where: {
                 id: Number(reviewId),
                 product_id: Number(productId)
@@ -94,7 +94,7 @@ router.put("/edit-review/producct/:productId/review/:reviewId", authenticationJW
             }
         })
 
-        if (!editedReview) {
+        if (editedReview.length === 0) {
             return res
             .status(500)
             .json({
@@ -172,7 +172,7 @@ router.get("/get-review/:id", authenticationJWT, async (req, res) => {
             })
         }
 
-        const review = await prismaClient.review.findFirst({
+        const review: any = await prismaClient.review.findFirst({
             where: {
                 id: Number(reviewId)
             },
@@ -181,7 +181,7 @@ router.get("/get-review/:id", authenticationJWT, async (req, res) => {
             }
         })
 
-        if (!review) {
+        if (review.length === 0) {
             return res
             .status(500)
             .json({
@@ -213,7 +213,7 @@ router.get("/get-all-reviews", authenticationJWT, async (req, res) => {
             }
         });
 
-        if (!allReviews) {
+        if (allReviews.length === 0) {
             return res
             .status(500)
             .json({

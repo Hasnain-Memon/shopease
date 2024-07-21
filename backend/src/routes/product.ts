@@ -76,7 +76,7 @@ router.post('/add-product', upload.fields([
             })
         }
 
-        const product = await prismaClient.product.create({
+        const product: any = await prismaClient.product.create({
             data: {
                 title: title,
                 description: description,
@@ -99,13 +99,13 @@ router.post('/add-product', upload.fields([
             }
         });
 
-        if (!product) {
+        if (product.length === 0) {
             return res
-            .status(502)
+            .status(404)
             .json({
-                status: 502,
-                message: "Something went wrong adding product"
-            });
+                status: 404,
+                message: "Products not found"
+            })
         }
 
         return res
@@ -189,12 +189,12 @@ router.get("/all-products", authenticationJWT, async (req, res) => {
             orderBy: sortStage
         });
 
-        if (!products) {
+        if (products.length === 0) {
             return res
-            .status(500)
+            .status(404)
             .json({
-                status: 500,
-                message: "Something went wrong while getting all products"
+                status: 404,
+                message: "Products not found"
             })
         }
 
@@ -226,7 +226,7 @@ router.get("/get-product/:id", authenticationJWT, async(req, res) => {
             })
         }
 
-        const product = await prismaClient.product.findFirst({
+        const product: any = await prismaClient.product.findFirst({
             where: {
                 id: Number(productId)
             },
@@ -241,12 +241,12 @@ router.get("/get-product/:id", authenticationJWT, async(req, res) => {
             }
         });
 
-        if (!product) {
+        if (product.length === 0) {
             return res
-            .status(500)
+            .status(404)
             .json({
-                status: 500,
-                message: "Something went wrong while getting product"
+                status: 404,
+                message: "Products not found"
             })
         }
 
@@ -448,7 +448,7 @@ router.get("/get-products-by-query", authenticationJWT, async (req, res) => {
             })
         }
 
-        const product = await prismaClient.product.findMany({
+        const products = await prismaClient.product.findMany({
             where: {
                 title: {
                     contains: String(searchTerm),
@@ -466,12 +466,12 @@ router.get("/get-products-by-query", authenticationJWT, async (req, res) => {
             }
         })
 
-        if (!product) {
+        if (products.length === 0) {
             return res
             .status(404)
             .json({
                 status: 404,
-                message: "products not found"
+                message: "Products not found"
             })
         }
 
@@ -479,7 +479,7 @@ router.get("/get-products-by-query", authenticationJWT, async (req, res) => {
             .status(200)
             .json({
                 status: 200,
-                product: product,
+                products,
                 message: "Products based on search term fetched successfully"
             })
         
