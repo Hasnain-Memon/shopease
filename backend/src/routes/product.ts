@@ -22,9 +22,9 @@ router.post('/add-product', upload.fields([
 ]) ,authenticationJWT, async (req: MulterRequest | any, res) => {
     try {
 
-        const { title, description, warehouseAddress1, warehouseAddress2, warehouseAddress3, shippingFee, price } = req.body;
+        const { title, description, address, price, category } = req.body;
 
-        if ([title, description, warehouseAddress1, warehouseAddress2, warehouseAddress3, shippingFee, price].some((field) => field?.trim() === "")) { 
+        if ([title, description, address, price, category].some((field) => field?.trim() === "")) { 
             return res
             .status(402)
             .json({
@@ -52,13 +52,13 @@ router.post('/add-product', upload.fields([
             }
         })
 
-        const category = await prismaClient.category.findFirst({
+        const categorry = await prismaClient.category.findFirst({
             where: {
-                name: "mens"
+                name: category
             }
         });
 
-        if (!category) {
+        if (!categorry) {
             return res
             .status(404)
             .json({
@@ -81,11 +81,8 @@ router.post('/add-product', upload.fields([
                 title: title,
                 description: description,
                 images: [productImageURL],
-                warehouse1: warehouseAddress1,
-                warehouse2: warehouseAddress2,
-                warehouse3: warehouseAddress3,
+                address: address,
                 price: price,
-                shipping_fee: shippingFee,
                 owner: {
                     connect: {
                         id: user.id
@@ -93,7 +90,7 @@ router.post('/add-product', upload.fields([
                 },
                 category: {
                     connect: {
-                        id: category.id
+                        id: categorry.id
                     }
                 }
             }
@@ -268,9 +265,9 @@ router.put("/update-product/:id", authenticationJWT, async (req, res) => {
     try {
         
         const productId = req.params.id;
-        const { title, description, shippingFee, price } = req.body;
+        const { title, description, price } = req.body;
 
-        if ([title, description, shippingFee, price].some((field) => field?.trim() === "")) {
+        if ([title, description, price].some((field) => field?.trim() === "")) {
             return res
             .status(400)
             .json({
@@ -295,7 +292,6 @@ router.put("/update-product/:id", authenticationJWT, async (req, res) => {
             data: {
                 title,
                 description,
-                shipping_fee: shippingFee,
                 price,
             }
         })

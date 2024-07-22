@@ -350,7 +350,7 @@ router.delete("/delete", authenticationJWT, async (req: any, res) => {
 
 })
 
-router.get("/all-users", authenticationJWT, async (req, res) => {
+router.get("/all-users", async (req, res) => {
     try {
 
         const users = await prismaClient.user.findMany({
