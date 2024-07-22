@@ -14,12 +14,7 @@ interface MulterRequest extends Request {
     };
 }
 
-router.post('/add-product', upload.fields([
-    {
-        name: "product_img",
-        maxCount: 8
-    }
-]) ,authenticationJWT, async (req: MulterRequest | any, res) => {
+router.post('/add-product', upload.array("product_img", 8), authenticationJWT, async (req: MulterRequest | any, res) => {
     try {
 
         const { title, description, address, price, category } = req.body;
@@ -33,11 +28,35 @@ router.post('/add-product', upload.fields([
             })
         }
 
-        const productImageLocalPath = req.files?.product_img[0]?.path;
-        const productImageObj = await uploadOnCloudinary(productImageLocalPath);
-        const productImageURL = productImageObj?.url;
+        console.log("Req.files: ", req.files);
 
-        if (!productImageURL) {
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({
+                status: 400,
+                message: "No files were uploaded"
+            });
+        }
+
+        const uploadedImageUrls = [];
+        for (const file of req.files) {
+            try {
+                const productImageLocalPath = file.path;
+                console.log("Uploading image from path:", productImageLocalPath);
+                
+                const productImageObj = await uploadOnCloudinary(productImageLocalPath);
+                const productImageURL = productImageObj?.url;
+
+                if (productImageURL) {
+                    uploadedImageUrls.push(productImageURL);
+                } else {
+                    console.error("Image upload failed for file:", file.originalname);
+                }
+            } catch (uploadError) {
+                console.error("Error uploading image:", uploadError);
+            }
+        }
+
+        if (uploadedImageUrls.length === 0) {
             return res
             .status(500)
             .json({
@@ -80,7 +99,7 @@ router.post('/add-product', upload.fields([
             data: {
                 title: title,
                 description: description,
-                images: [productImageURL],
+                images: uploadedImageUrls,
                 address: address,
                 price: price,
                 owner: {
@@ -319,9 +338,7 @@ router.put("/update-product/:id", authenticationJWT, async (req, res) => {
     }
 })
 
-router.post("/update-product-images/:id", upload.fields([
-    { name: "product_img", maxCount: 8 }
-]), authenticationJWT, async (req: MulterRequest | any, res) => {
+router.post("/update-product-images/:id", upload.array("product_img", 8), authenticationJWT, async (req: MulterRequest | any, res) => {
     try {
         
         const userId = req.user.id;
@@ -335,10 +352,28 @@ router.post("/update-product-images/:id", upload.fields([
             })
         }
 
-        const productImageLocalPath = req.files.product_img[0].path;
-        const productImages = await uploadOnCloudinary(productImageLocalPath);
+        const uploadImagesUrls: string[] = [];
+        for (const file of req.files) {
+            try {
+                
+                const productImageLocalPath = file.path;
+
+                const productImageObj = await uploadOnCloudinary(productImageLocalPath);
+                const productImageURL = productImageObj?.url;
+
+                if (productImageURL) {
+                    uploadImagesUrls.push(productImageURL);
+                } else {
+                    console.error("Image upload failed for file");
+                }
+
+            } catch (error) {
+                console.log("Error uploading images", error);
+                throw error;
+            }
+        }
         
-        if (!productImages?.url) {
+        if (uploadImagesUrls.length === 0) {
             return res
             .status(501)
             .json({
@@ -353,7 +388,7 @@ router.post("/update-product-images/:id", upload.fields([
                 owner_id: Number(userId)
             },
             data: {
-                images: [productImages.url]
+                images: uploadImagesUrls
             }
         })
 
