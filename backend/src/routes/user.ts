@@ -2,7 +2,7 @@ import { Router } from "express";
 import { PrismaClient, User } from "@prisma/client";
 import { upload } from "../middlewares/multer.middleware";
 import { uploadOnCloudinary } from "../utils/cloudinary";
-import bcrypt, { compareSync } from "bcryptjs"
+import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import { authenticationJWT } from "../middlewares/auth.middleware";
 
@@ -16,7 +16,7 @@ interface MulterRequest extends Request {
     };
 }
 
-router.post('/sign-up',upload.fields([
+router.post('/sign-up', upload.fields([
     {
         name: "profile_img",
         maxCount: 1
@@ -57,26 +57,31 @@ router.post('/sign-up',upload.fields([
     
         // hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
+
+        let profileImageUrl: string = "https://via.placeholder.com/150";
         
-        // upload file on cloudinary
-        const profileImageLocalPath = req.files?.profile_img[0]?.path;
-        const profileImage = await uploadOnCloudinary(profileImageLocalPath);
-    
-        if (!profileImage) {
-            return res
-            .status(500)
-            .json({
-                status: 500,
-                message: "Something went wrong uploading image on cloudinary"
-            })
+        if (req.files?.profile_img?.[0]?.path) {
+            const profileImageLocalPath = req.files.profile_img[0].path;
+            const profileImage = await uploadOnCloudinary(profileImageLocalPath);
+
+            if (!profileImage) {
+                return res.status(500).json({
+                    status: 500,
+                    message: "Something went wrong uploading the image to Cloudinary"
+                });
+            }
+
+            // Use the Cloudinary URL if the image was uploaded successfully
+            profileImageUrl = profileImage.url;
         }
+
         // create a new user
         const user = await prismaClient.user.create({
             data: {
                 username: username,
                 email: email,
                 password: hashedPassword,
-                profile_img: profileImage.url
+                profile_img: profileImageUrl
             }
         })
 
@@ -104,7 +109,7 @@ router.post('/sign-up',upload.fields([
 })
 
 router.post('/sign-in', async (req, res) => {
-try {
+    try {
     
         const { email, password } = req.body;
     
@@ -140,13 +145,18 @@ try {
             .json({
                 status: 400,
                 message: "Incorrect password"
-            })
+            });
         }
     
         const tokenSecret: any = process.env.ACCESS_TOKEN_SECRET;
     
         const token = jwt.sign(
-            { id: user.id },
+            {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                profileImage: user.profile_img
+            },
             tokenSecret,
             { expiresIn: process.env.ACCESS_TOKEN_EXPIRY}
         )
@@ -160,23 +170,23 @@ try {
             })
         }
     
-        const options = {
-            httpOnly: true,
-            secure: true
-        }
-    
         return res
         .status(200)
-        .cookie("accessToken", token, options)
+        .cookie("accessToken", token, {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === "production",
+            domain: "localhost",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
         .json({
             status: 200,
             user,
             message: "User logged in successfully"
         })
-} catch (error) {
-    console.log("Error signing user", error);
-    throw error;
-}
+    } catch (error) {
+        console.log("Error signing user", error);
+        throw error;
+    }
 
 })
 
@@ -208,7 +218,11 @@ router.get('/sign-out', authenticationJWT, async (req: Request | any, res) => {
 
         return res
         .status(200)
-        .clearCookie("accessToken", options)
+        .clearCookie("accessToken", {
+            httpOnly: false,
+            secure: process.env.NODE_ENV === "production",
+            domain: "localhost",
+        })
         .json({
             status: 200,
             message: "User signed out successfully"
@@ -442,12 +456,7 @@ router.get("/:id", authenticationJWT, async (req, res) => {
     }
 })
 
-router.post("/change-profle-image", upload.fields([
-    {
-        name: "profile_img",
-        maxCount: 1
-    }
-]),  authenticationJWT, async (req: MulterRequest | any, res) => {
+router.post("/change-profle-image", upload.single("profile_img"),  authenticationJWT, async (req: any, res) => {
     try {
 
         const userId = req.user.id;
@@ -460,8 +469,22 @@ router.post("/change-profle-image", upload.fields([
                 message: "User id is missing"
             })
         }
+
+        if(!req.file) {
+            return res
+            .status(404)
+            .json({
+                status: 404,
+                message: "file not found!"
+            })
+        }
         
-        const profileImageLocalPath = req.files?.profile_img[0]?.path;
+        const profileImageLocalPath = req.file.path;
+
+        if(!profileImageLocalPath) {
+            console.log("Profile image local path not found!");
+        }
+
         const profileImage = await uploadOnCloudinary(profileImageLocalPath);
         
         if (!profileImage?.url) {

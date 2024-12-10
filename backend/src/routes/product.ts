@@ -180,7 +180,7 @@ router.delete("/remove-product/:id", authenticationJWT, async (req, res) => {
     }
 })
 
-router.get("/all-products", authenticationJWT, async (req, res) => {
+router.get("/all-products", async (req, res) => {
     try {
 
         const { page = 1, limit = 10, sortBy, sortType }: any = req.query;

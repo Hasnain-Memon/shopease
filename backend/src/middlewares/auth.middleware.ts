@@ -13,6 +13,8 @@ const authenticationJWT = async (req: Request | any, res: Response | any, next: 
         
         const encodedToken = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
 
+        console.log("encoded token:", encodedToken);
+
         if (!encodedToken) {
             return res
             .status(401)
@@ -25,13 +27,14 @@ const authenticationJWT = async (req: Request | any, res: Response | any, next: 
         const tokenSecret: any = process.env.ACCESS_TOKEN_SECRET;
         const decodedToken = jwt.verify(encodedToken, tokenSecret);
 
+        // @ts-ignore
         if(!isJwtPayload(decodedToken)){
             if (!isJwtPayload(decodedToken)) {
                 return res.status(403).json({
                   status: 403,
                   message: "Invalid access token <isJwtPayload-check>"
                 });
-              }
+            }
         }
 
 
